@@ -62,6 +62,23 @@ client/
   src/redux/        Estado global
 ```
 
+## Qué cambió respecto del original
+
+El original (2021) funcionaba como proyecto de equipo, pero el servidor confiaba en los datos que mandaba el cliente.
+En esta versión se reescribió la capa de seguridad y de pagos, y se actualizaron las dependencias:
+
+| Tema | Original (2021) | 2.0 |
+| --- | --- | --- |
+| **Autenticación** | Las rutas no validaban quién llamaba: el servidor tomaba los ids del cuerpo del pedido | La API valida el **ID token de Firebase** en cada request y exige email verificado en las rutas privadas |
+| **Permisos** | Sin control de acceso por usuario | Cada usuario solo accede a sus datos: un profesional ve a sus pacientes y sus citas, un paciente las suyas |
+| **Pagos y suscripción** | La suscripción se acreditaba comparando un comprobante guardado | El servidor **consulta el pago a Mercado Pago** antes de acreditar, y hay un **webhook** (`/mp/webhook`) |
+| **Credenciales** | Tokens de Mercado Pago y datos del mail escritos en el código | Todo en variables de entorno; la API arranca avisando qué falta y qué funcionalidad queda deshabilitada |
+| **Seguridad HTTP** | CORS abierto a cualquier origen | `helmet` y CORS limitado al origen del cliente |
+| **Errores** | Manejo disperso en cada ruta | Manejo central (`asyncHandler`, `httpError`) y utilidades compartidas (`dates`, `mailer`, `mercadopago`) |
+| **Tests** | Tests de modelos | Tests de modelos, de rutas (validación, pagos, configuración) y del cliente |
+| **Dependencias** | `react-scripts` 4, `axios` 0.21, SDK de Mercado Pago 1.x | `react-scripts` 5, `axios` 1.x, SDK de Mercado Pago 2.x, Node 20+ |
+| **Cliente** | Un solo árbol de componentes | Vistas, contexto y hooks separados (`useProfileInfo`, `ViewContext`), cliente HTTP y configuración propios |
+
 ## Puesta en marcha
 
 Requisitos: Node 20+ y PostgreSQL.
