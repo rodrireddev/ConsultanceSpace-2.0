@@ -1,84 +1,82 @@
+<p align="center">
+  <img src="client/src/components/Header/CONSULTANCESPACETIPO.png" alt="Consultance Space" width="320">
+</p>
 
-# ![logo](client/src/components/Header/CONSULTANCESPACETIPO.png)
+# Consultance Space
 
+Plataforma web de **gestión médica** que conecta a profesionales de la salud con sus pacientes: agenda de citas,
+historia clínica, cobros con Mercado Pago, stock del consultorio y búsqueda de profesionales por especialidad.
 
+> **Estado:** proyecto en desarrollo, hecho en equipo. La API valida identidad con Firebase y cobra con Mercado Pago;
+> hace falta configurar tus propias credenciales para correrlo (ver [Puesta en marcha](#puesta-en-marcha)).
 
-## Introducción
+## Capturas
 
-Consultance Space es una plataforma en desarrollo de gestión médica y acercamiento entre profesionales y pacientes.
+| Home | Login |
+| --- | --- |
+| ![Home](client/src/assets/img/readme/1.PNG) | ![Login](client/src/assets/img/readme/2.PNG) |
 
-## Objetivos
+### Panel de administración responsive
 
-Crear una plataforma 100% responsive dónde los profesionales de la salud puedan:
+![Panel responsive](client/src/assets/img/readme/responsive.gif)
 
- * Registrar a sus pacientes. 
+## Qué permite hacer
 
- * Agendar y cancelar citas. 
+**Profesionales**
+- Registrar pacientes y llevar su **ficha médica** (antecedentes patológicos y no patológicos, tratamientos).
+- Definir horarios y **agendar o cancelar citas**.
+- **Cobrar** las consultas y ver el flujo de fondos (Mercado Pago, con conexión OAuth a la cuenta del profesional).
+- Llevar el **stock** del consultorio.
+- Suscripción al servicio, acreditada solo cuando el servidor confirma el pago.
 
- * Llevar registro y editar su ficha médica asociada
+**Pacientes**
+- Buscar profesionales por especialidad y **reservar citas** en los horarios disponibles.
+- **Pagar** las consultas online y cancelar citas.
+- Consultar su historial médico.
 
- * Cobrar y ver dinámica su flujo de fondos
+## Stack
 
- * Llevar registro del stock de su clínica
+| Capa | Tecnología |
+| --- | --- |
+| Cliente | React 17, Redux (thunk), Material-UI v4, Formik, Recharts, React Router 5 |
+| API | Node.js 20+, Express 4, Sequelize 6, Helmet, Nodemailer |
+| Base de datos | PostgreSQL |
+| Autenticación | Firebase Authentication (el servidor valida el ID token) |
+| Pagos | Mercado Pago (OAuth, checkout y webhook) |
+| Tests | Mocha, Chai y Supertest |
 
- * Contactarse con otros profesionales
+## Estructura
 
-
- Y dónde los pacientes tengan la libertad de:
-
- * Buscar profesionales por especialidad y reservar citas con ellos en los horarios adecuados
-
- * Pagar de forma virtual sus consultas
-
- * Cancelar citas
-
- * Acceder en todo momento a su historial médico
-
-## Developer Team
-
- * @RodrigoToledo5
- 
- * @jescabvaz
-
- * @MarlonLondono
-
- * @JorgeDGutierrez
-
- * @Hasuro1797 
-
- * @ftbalboa 
-
-## Stack de Tecnologías
-
-### Front End:
-
-HTML, CSS, Javascript, React, Material-ui, Redux
-
-### Back End:
-
-Node js, Javascript, Express, Sequelize
-
-### Database:
-
-PostgreSQL
+```
+api/
+  src/models/       Modelos de Sequelize (pacientes, citas, horarios, pagos, stock, antecedentes…)
+  src/routes/       Endpoints por funcionalidad; las públicas, las autenticadas y las de email verificado
+  src/middleware/   Validación del token de Firebase
+  src/services/     Firebase y suscripciones
+  tests/            Tests de modelos y de rutas
+client/
+  src/components/   Dashboard, pacientes, profesionales, pagos, login y registro
+  src/redux/        Estado global
+```
 
 ## Puesta en marcha
 
 Requisitos: Node 20+ y PostgreSQL.
 
-### API (`/api`)
+### API
 
 ```bash
 cd api
-cp .env.example .env   # completar DATABASE_URL, FIREBASE_PROJECT_ID, GMAIL, MP_*
+cp .env.example .env   # completar DATABASE_URL, FIREBASE_PROJECT_ID, GMAIL_*, MP_*
 npm install
 npm run dev            # http://localhost:3005
-npm test               # los tests de rutas no necesitan DB; los de models sí
+npm test               # los tests de rutas no necesitan base de datos; los de modelos sí
 ```
 
-Sin `DATABASE_URL` y `FIREBASE_PROJECT_ID` la API no arranca y dice qué falta; sin `GMAIL_*` o `MP_*` arranca igual pero avisa qué funcionalidad queda deshabilitada. **Nunca se versionan credenciales**: solo los `.env.example`.
+Sin `DATABASE_URL` y `FIREBASE_PROJECT_ID` la API no arranca y dice qué falta. Sin `GMAIL_*` o `MP_*` arranca igual,
+pero avisa qué funcionalidad queda deshabilitada. **Nunca se versionan credenciales**: solo los `.env.example`.
 
-### Cliente (`/client`)
+### Cliente
 
 ```bash
 cd client
@@ -87,23 +85,18 @@ npm install --legacy-peer-deps
 npm start              # http://localhost:3000
 ```
 
-### Seguridad
+## Seguridad
 
-- La API valida en cada request el **ID token de Firebase** (`Authorization: Bearer <token>`); `FIREBASE_PROJECT_ID` debe ser el mismo proyecto que usa el cliente. Cada usuario solo accede a sus datos (citas, historia clínica de sus pacientes, stock, etc.).
-- Las suscripciones se acreditan solo después de que el servidor **consulta el pago a Mercado Pago** (`/addSub` con el `payment_id`, y el webhook `/mp/webhook`). Para que el webhook funcione, `API_URL` debe ser una URL pública de la API.
+- La API valida en cada request el **ID token de Firebase** (`Authorization: Bearer <token>`); `FIREBASE_PROJECT_ID`
+  debe ser el mismo proyecto que usa el cliente. Cada usuario solo accede a sus propios datos (citas, historia
+  clínica de sus pacientes, stock).
+- Las suscripciones se acreditan solo después de que el servidor **consulta el pago a Mercado Pago** (`/addSub` con el
+  `payment_id` y el webhook `/mp/webhook`). Para que el webhook funcione, `API_URL` debe ser una URL pública.
+- La redirect URI de OAuth de Mercado Pago debe coincidir con `MP_REDIRECT_URI` (API) y con
+  `<origen del cliente>/payments`.
 
-La redirect URI de OAuth de Mercado Pago debe coincidir con `MP_REDIRECT_URI` (API) y con `<origen del cliente>/payments`.
+## Equipo
 
-## Imágenes del proyecto
-
-### Home
-![img1](/client/src/assets/img/readme/1.PNG)
-
-### Login
-![img2](/client/src/assets/img/readme/2.PNG)
-
-### Responsive Admin Dashboard
-
-![gif](/client/src/assets/img/readme/responsive.gif)
-
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FRodrigoToledo5%2FConsultanceSpace&count_bg=%2333988E&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=views&edge_flat=false)](https://hits.seeyoufarm.com)
+[@RodrigoToledo5](https://github.com/RodrigoToledo5) · [@jescabvaz](https://github.com/jescabvaz) ·
+[@MarlonLondono](https://github.com/MarlonLondono) · [@JorgeDGutierrez](https://github.com/JorgeDGutierrez) ·
+[@Hasuro1797](https://github.com/Hasuro1797) · [@ftbalboa](https://github.com/ftbalboa)
