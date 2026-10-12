@@ -7,8 +7,11 @@
 Plataforma web de **gestión médica** que conecta a profesionales de la salud con sus pacientes: agenda de citas,
 historia clínica, cobros con Mercado Pago, stock del consultorio y búsqueda de profesionales por especialidad.
 
-> **Estado:** proyecto en desarrollo, hecho en equipo. La API valida identidad con Firebase y cobra con Mercado Pago;
-> hace falta configurar tus propias credenciales para correrlo (ver [Puesta en marcha](#puesta-en-marcha)).
+> **Remake:** esta es la versión 2.0 de un proyecto hecho en equipo hace cinco años. El repositorio original está en
+> [RodrigoToledo5/ConsultanceSpace](https://github.com/RodrigoToledo5/ConsultanceSpace).
+
+> **Estado:** en desarrollo. La API valida identidad con Firebase y cobra con Mercado Pago; hace falta configurar tus
+> propias credenciales para correrlo (ver [Puesta en marcha](#puesta-en-marcha)).
 
 ## Capturas
 
